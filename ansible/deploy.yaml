@@ -1,0 +1,43 @@
+- name: deploy app to k8s
+  hosts: localhost
+  tasks:
+    - name: create k8s deployment
+      state: present
+      definition:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: hello-word-deploy
+          
+        spec:
+          replicas: 3
+          selector:
+            matchLabels: 
+              app: hello-word
+          template: 
+            metadata:
+              labels: 
+                app: hello-word
+          spec:
+            containers:
+            - name: helloworld
+              image: omarhasni123/helloworld-python:latest
+              ports:
+              - containerPort: 5000
+
+    - name: create k8s service 
+      k8s:
+        state: present 
+        definition: 
+          apiVersion: v1
+          kind: Service
+          metadate:
+            name: helloworld-service
+          spec:
+            selector:
+              app: helloworld
+            ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 5000
+            type: LoadBalancer
